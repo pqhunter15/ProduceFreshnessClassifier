@@ -37,73 +37,105 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-**Note:** If you encounter numpy compatibility issues with PyTorch, ensure numpy is version <2:
-```bash
-pip install "numpy<2"
-```
+**Note:** The requirements.txt now includes proper version pinning for all dependencies including:
+- tensorflow>=2.13,<2.15
+- streamlit>=1.30,<1.35
+- opencv-python>=4.8,<4.10
+- ultralytics>=8.0,<9
+- And other dependencies with version constraints
 
-### 4. Verify Model File
+### 4. Model Setup
 
-Ensure the freshness classifier model exists at:
-```
-src/freshness_inference/fresh_rotten_resnet_tuned_conv4_conv5.keras
-```
-
-If the file is missing, download it from the Hugging Face repository:
+The freshness classifier model will be automatically downloaded from Hugging Face on first run:
 - Repository: `pqhunter15/freshnessclassv1`
 - File: `fresh_rotten_resnet_tuned_conv4_conv5.keras`
 
-Place it in the `src/freshness_inference/` directory.
+If you prefer to download it manually, place it in the `src/freshness_inference/` directory.
 
 ## Running the Application
 
 ### Run the Main Streamlit App
 
 ```bash
-streamlit run
+streamlit run streamlit_app.py
 ```
 
 This will start the application at `http://localhost:8501`
 
-### Run the Main Streamlit App with Custom Settings
+### Run with Debug Logging
 
 ```bash
-streamlit run --logger.level=debug
+streamlit run streamlit_app.py --logger.level=debug
 ```
 
-### Alternative 1: Run app1.py (Light Model Variant)
+**Note:** The application has been refactored into a modular structure with:
+- Enhanced error handling and logging
+- Automatic model downloading
+- Improved UI components
+- Better code organization
 
-```bash
-streamlit run app1.py
-```
-
-### Alternative 2: Run app2.py (Heavy Model Variant)
-
-```bash
-streamlit run app2.py
-```
+The previous `app1.py` and `app2.py` files have been removed as they were duplicates.
 
 ## Application Features
 
 The Streamlit app includes:
 
 - **Model Selection:**
-  - Banana Only (Light/Heavy versions)
-  - Fruit & Veg (Light/Heavy versions)
+  - **Fruit & Veg** group:
+    - Light: Combined dataset YOLO11m (50 epochs, 768px)
+    - Heavy: Combined dataset YOLO11x (120 epochs, 896px)
+  - **Banana Only** group:
+    - Light: Banana-only YOLO11x (150 epochs, 896px)
+    - Heavy: Banana-only YOLO11n (100 epochs, 640px)
 
 - **Image Input:**
-  - Upload an image or capture using camera
+  - Upload an image file or capture using camera
 
 - **Detection Models:**
-  - `best.pt`: Banana-only YOLO11x (150 epochs, 896px)
-  - `banana_yolo11n_best.pt`: Banana-only YOLO11n (100 epochs, 640px)
-  - `best3.pt`: Combined YOLO11m (50 epochs, 768px)
-  - `best4-all-heavy.pt`: Combined heavy YOLO11x (120 epochs, 896px)
+  - `best3.pt`: Fruit & Veg Light (YOLO11m, 50 epochs, 768px)
+  - `best4-all-heavy.pt`: Fruit & Veg Heavy (YOLO11x, 120 epochs, 896px)
+  - `best.pt`: Banana Only Light (YOLO11x, 150 epochs, 896px)
+  - `banana_yolo11n_best.pt`: Banana Only Heavy (YOLO11n, 100 epochs, 640px)
 
 - **Output:**
   - Original image display
-  - Final prediction with bounding boxes
+  - Final prediction with color-coded bounding boxes (green for fresh, red for rotten)
   - Collapsible "More details" section with intermediate results
+  - Confidence scores and prediction probabilities
+
+- **Enhanced Features:**
+  - Comprehensive logging for debugging
+  - Robust error handling
+  - Automatic model downloading
+  - Modular code structure for maintainability
+
+## Code Structure
+
+The application has been refactored for better maintainability:
+
+```
+src/
+├── freshness_inference/
+│   ├── constants.py          # Configuration constants
+│   ├── logging_config.py     # Logging setup
+│   ├── model.py             # Freshness classifier
+│   ├── preprocess.py        # Image preprocessing
+│   └── config.py            # Model configuration
+└── streamlit_ui/
+    ├── __init__.py
+    └── components.py        # Reusable UI components
+
+streamlit_app.py             # Main application (refactored)
+scripts/
+└── predict_folder.py        # Batch processing script
+```
+
+Key improvements:
+- Centralized configuration in `constants.py`
+- Structured logging with `logging_config.py`
+- Modular UI components
+- Enhanced error handling throughout
+- Type hints and documentation
 
 ## Batch Processing (Predict Folder)
 
@@ -131,7 +163,7 @@ python3.12 scripts/predict_folder.py --folder-path <path_to_folder> --output-csv
 
 If port 8501 is already in use:
 ```bash
-streamlit run app1.py --server.port 8502
+streamlit run streamlit_app.py --server.port 8502
 ```
 
 ### Module Import Errors
@@ -141,12 +173,30 @@ Ensure you're in the virtual environment:
 source venv/bin/activate
 ```
 
+### Model Download Issues
+
+If the automatic model download fails:
+1. Check your internet connection
+2. Ensure you have the `huggingface_hub` package installed
+3. Manually download from: https://huggingface.co/pqhunter15/freshnessclassv1
+4. Place the file in `src/freshness_inference/`
+
+### Logging and Debugging
+
+The application now includes comprehensive logging. Check the `freshness_inference.log` file for detailed information about any issues.
+
 ### Numpy/TensorFlow Compatibility Issues
 
-Downgrade numpy to <2:
+The requirements.txt includes proper version constraints. If you still encounter issues:
 ```bash
-pip install --upgrade "numpy<2"
+pip install --upgrade "numpy>=1.24,<2" "tensorflow>=2.13,<2.15"
 ```
+
+### Performance Issues
+
+- The app uses `@st.cache_resource` for model caching
+- For large images, the app automatically resizes to 1280x720 for processing
+- Detection models are cached after first load
 
 Then restart the kernel:
 ```bash
