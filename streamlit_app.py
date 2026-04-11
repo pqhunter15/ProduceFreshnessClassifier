@@ -7,8 +7,8 @@ import os
 
 from src.freshness_inference.model import FreshnessClassifier
 
-st.set_page_config(page_title="Banana Detector", layout="wide")
-st.title("Banana Detector")
+st.set_page_config(page_title="Freshness Detector", layout="wide")
+st.title("Freshness Detector")
 st.write("Take a picture or upload an image, then run YOLO detection.")
 
 MODEL_GROUPS = {
