@@ -1,8 +1,8 @@
 from dataclasses import dataclass
 from typing import Dict, Any
 
+import numpy as np
 import tensorflow as tf
-from huggingface_hub import hf_hub_download
 
 from .config import (
     MODEL_REPO_ID,
@@ -10,7 +10,7 @@ from .config import (
     CLASS_NAMES,
     DEFAULT_THRESHOLD,
 )
-from .preprocess import make_batch_from_path
+from .preprocess import make_batch_from_path, make_batch_from_array
 
 
 @dataclass
@@ -46,15 +46,11 @@ class FreshnessClassifier:
         self.model = self._load_model()
 
     def _load_model(self) -> tf.keras.Model:
-        model_path = hf_hub_download(
-            repo_id=self.repo_id,
-            filename=self.filename,
-        )
-        return tf.keras.models.load_model(model_path)
+        from pathlib import Path
+        model_path = Path(__file__).parent / "fresh_rotten_resnet_tuned_conv4_conv5.keras"
+        return tf.keras.models.load_model(str(model_path))
 
-    def predict_image(self, image_path: str) -> PredictionResult:
-        batch = make_batch_from_path(image_path)
-
+    def _predict_batch(self, batch: tf.Tensor, image_path: str) -> PredictionResult:
         # Model outputs sigmoid probability for class 1 = Rotten
         rotten_prob = float(self.model.predict(batch, verbose=0)[0][0])
         fresh_prob = 1.0 - rotten_prob
@@ -70,3 +66,11 @@ class FreshnessClassifier:
             rotten_probability=round(rotten_prob, 6),
             threshold=self.threshold,
         )
+
+    def predict_image(self, image_path: str) -> PredictionResult:
+        batch = make_batch_from_path(image_path)
+        return self._predict_batch(batch, image_path)
+
+    def predict_array(self, image_array: np.ndarray, image_path: str = "<array>") -> PredictionResult:
+        batch = make_batch_from_array(image_array)
+        return self._predict_batch(batch, image_path)

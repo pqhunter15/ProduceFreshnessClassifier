@@ -1,6 +1,10 @@
 from pathlib import Path
 import argparse
 import pandas as pd
+import sys
+
+# Add the parent directory to sys.path to import from src
+sys.path.append(str(Path(__file__).parent.parent))
 
 from src.freshness_inference.model import FreshnessClassifier
 
@@ -12,7 +16,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(
         description="Run freshness inference on all images in a folder."
     )
-    parser.add_argument("--folder-path", required=True, help="Folder of images.")
+    parser.add_argument("--folder-path", default="sample_images/", help="Folder of images.")
     parser.add_argument(
         "--output-csv",
         default="predictions.csv",

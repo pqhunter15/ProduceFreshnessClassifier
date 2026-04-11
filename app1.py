@@ -9,7 +9,7 @@ st.set_page_config(page_title="Banana Detector", layout="wide")
 st.title("Banana Detector")
 st.write("Take a picture or upload an image, then run YOLO detection.")
 
-MODEL_PATH = "best3.pt"
+MODEL_PATH = "weights/best3.pt"
 
 @st.cache_resource
 def load_model():
