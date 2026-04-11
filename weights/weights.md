@@ -1,0 +1,4 @@
+best.pt — Banana-only dataset — This was the heavier YOLO11x banana-only run trained  with 150 epochs, 896 image size, batch 16, and AdamW/cosine LR tuning. 
+banana_yolo11n_best.pt — Banana-only dataset — This was a lighter YOLO11n banana-only model trained with 100 epochs, 640 image size, and batch 32. 
+best3.pt — Combined fruit-and-vegetable dataset —  YOLO11m with 50 epochs, 768 image size, batch 16, and augmentation.
+best4-all-heavy.pt — Combined fruit-and-vegetable dataset — This was the heavier combined-data, trained for 120 epochs at 896 resolution with AdamW, cosine LR, caching, and augmentation. 

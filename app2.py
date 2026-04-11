@@ -9,7 +9,7 @@ st.set_page_config(page_title="Banana Detector", layout="wide")
 st.title("Banana Detector")
 st.write("Take a picture or upload an image, then run YOLO detection.")
 
-MODEL_PATH = "best4-all-heavy.pt"
+MODEL_PATH = "weights/best4-all-heavy.pt"
 
 @st.cache_resource
 def load_model():
@@ -39,6 +39,7 @@ if image_file is not None:
     # Open image and fix hidden phone/camera orientation metadata
     pil_img = Image.open(image_file)
     pil_img = ImageOps.exif_transpose(pil_img).convert("RGB")
+    pil_img = pil_img.resize((1280, 720))
 
     col1, col2 = st.columns(2)
 
